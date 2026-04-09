@@ -9,25 +9,12 @@
     <link rel="manifest" href="manifest.webmanifest">
   </head>
   <body>
-    <!-- Background Animation Layer -->
-    <div class="bg-layer">
-      <div class="balloon-bg" style="left: 10%; animation-delay: 0s; background: rgba(255, 60, 100, 0.4);"></div>
-      <div class="balloon-bg" style="left: 30%; animation-delay: 3s; background: rgba(0, 200, 255, 0.4); width: 80px; height: 100px;"></div>
-      <div class="balloon-bg" style="left: 50%; animation-delay: 7s; background: rgba(100, 255, 100, 0.4); width: 120px; height: 140px;"></div>
-      <div class="balloon-bg" style="left: 70%; animation-delay: 2s; background: rgba(255, 200, 0, 0.4); width: 90px; height: 110px;"></div>
-      <div class="balloon-bg" style="left: 90%; animation-delay: 5s; background: rgba(200, 100, 255, 0.4); width: 110px; height: 130px;"></div>
-    </div>
-
     <div id="unity-container">
       <canvas id="unity-canvas" width=960 height=600 tabindex="-1"></canvas>
       <div id="unity-loading-bar">
-        <div class="glass-panel">
-          <h1 class="game-title">BALOON POPER</h1>
-          <h2 class="game-subtitle">Get Ready to Pop!</h2>
-          <div id="unity-progress-bar-empty">
-            <div id="unity-progress-bar-full"></div>
-          </div>
-          <div id="unity-loading-text">Starting up<span class="loading-dots"></span></div>
+        <div id="unity-logo"></div>
+        <div id="unity-progress-bar-empty">
+          <div id="unity-progress-bar-full"></div>
         </div>
       </div>
       <div id="unity-warning"> </div>
@@ -107,51 +94,13 @@
 
       loadingBar.style.display = "block";
 
-      // Fetch Content-Length to determine total MB (fallback to known size 28.5 MB if headers are blocked)
-      var totalDownloadSizeMB = 28.50; 
-      async function getDownloadSize() {
-        let totalBytes = 0;
-        try {
-          const urls = [config.dataUrl, config.codeUrl, config.frameworkUrl];
-          for (const url of urls) {
-            if(!url) continue;
-            let resp = await fetch(url, { method: 'HEAD' });
-            let len = resp.headers.get('content-length');
-            if (len) {
-              totalBytes += parseInt(len, 10);
-            }
-          }
-          if (totalBytes > 0) {
-            totalDownloadSizeMB = totalBytes / (1024 * 1024);
-          }
-        } catch (e) {
-          console.warn("Could not fetch exact file sizes, using fallback size.");
-        }
-      }
-      getDownloadSize();
-
       var script = document.createElement("script");
       script.src = loaderUrl;
       script.onload = () => {
-        var loadingText = document.getElementById('unity-loading-text');
-
         createUnityInstance(canvas, config, (progress) => {
           progressBarFull.style.width = 100 * progress + "%";
-          
-          // Calculate current MB
-          var currentMB = (progress * totalDownloadSizeMB).toFixed(2);
-          var totalStr = totalDownloadSizeMB.toFixed(2);
-          
-          if (progress === 1) {
-            loadingText.innerHTML = `Complete! Enjoy the game.`;
-          } else {
-            loadingText.innerHTML = `Downloading: ${currentMB} MB / ${totalStr} MB`;
-          }
         }).then((unityInstance) => {
           loadingBar.style.display = "none";
-          // Hide background animation when game loads
-          var bgLayer = document.querySelector('.bg-layer');
-          if (bgLayer) bgLayer.style.display = 'none';
         }).catch((message) => {
           alert(message);
         });
